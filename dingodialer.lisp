@@ -16,12 +16,14 @@
     (drakma:http-request *base-url* :method :post :parameters *command-parameters* :cookie-jar cookie-jar)))
 
 
-(defun asterisk-originate ()
+(defun asterisk-originate (phone)
   (let* ((cookie-jar (make-instance 'drakma:cookie-jar))
-         (*command-parameters* '(("action" . "originate")
+         (channel (format nil "Local/~a@from-dialer/n" phone))
+         (*command-parameters* `(("action" . "originate")
                                  ("exten" . "s")
-                                 ("channel" . "Local/21123132@from-dialer/n")
+                                 ("channel" . ,channel)
                                  ("context" . "call-answered")
                                  ("priority" . "1"))))
     (drakma:http-request *base-url* :method :post :parameters *login-parameters* :cookie-jar cookie-jar)
-    (drakma:http-request *base-url* :method :post :parameters *command-parameters* :cookie-jar cookie-jar)))
+    (drakma:http-request *base-url* :method :post :parameters *command-parameters* :cookie-jar cookie-jar)
+    ))
