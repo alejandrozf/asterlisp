@@ -1,0 +1,43 @@
+version: '3.7'
+services:
+  asterisk-dialer:
+    container_name: asterisk-dialer
+    hostname: asterisk-dialer
+    dns: 8.8.8.8
+    environment:
+      - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - TZ=America/Argentina/Cordoba
+    image: andrius/asterisk:16-current
+    networks:
+      dialer:
+        ipv4_address: 172.36.0.2
+    privileged: true
+    restart: on-failure
+    stop_grace_period: 1m30s
+    volumes:
+      - $PWD/asterisk-dialer/:/var/tmp
+
+  asterisk-pstn:
+    container_name: asterisk-pstn
+    hostname: asterisk-pstn
+    dns: 8.8.8.8
+    environment:
+      - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - TZ=America/Argentina/Cordoba
+    image: andrius/asterisk:16-current
+    networks:
+      dialer:
+        ipv4_address: 172.36.0.3
+    privileged: true
+    restart: on-failure
+    stop_grace_period: 1m30s
+    volumes:
+      - $PWD/asterisk-pstn/:/var/tmp
+
+networks:
+  dialer:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.36.0.0/24
