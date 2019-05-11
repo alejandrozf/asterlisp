@@ -9,8 +9,8 @@ services:
       - TZ=America/Argentina/Cordoba
     image: andrius/asterisk:16-current
     networks:
-      dialer:
-        ipv4_address: 172.36.0.2
+      dingodialer:
+        ipv4_address: 172.46.0.2
     privileged: true
     restart: on-failure
     stop_grace_period: 1m30s
@@ -26,8 +26,8 @@ services:
       - TZ=America/Argentina/Cordoba
     image: andrius/asterisk:16-current
     networks:
-      dialer:
-        ipv4_address: 172.36.0.3
+      dingodialer:
+        ipv4_address: 172.46.0.3
     privileged: true
     restart: on-failure
     stop_grace_period: 1m30s
@@ -35,9 +35,9 @@ services:
       - $PWD/asterisk-pstn/:/var/tmp
 
 networks:
-  dialer:
+  dingodialer:
     driver: bridge
     ipam:
       driver: default
       config:
-        - subnet: 172.36.0.0/24
+        - subnet: 172.46.0.0/24
