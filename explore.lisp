@@ -1,19 +1,43 @@
 ;; Sockets AMI TCP snippet working!!
 (ql:quickload '(:usocket :bordeaux-threads :safe-queue :babel))
 
-(setf *socket* (usocket:socket-connect "asterisk-dialer" 5038))
+(defparameter *crlf* (format nil "~C~C" #\return #\newline))
 
-(setf *stream* (usocket:socket-stream *socket*))
+(defclass manager ()
+  ((socket :accessor manager->socket :initform nil)
+   (connected :accessor manager->connected :iniform nil)
+   (response-queue :accessor manager->response-queue)
+   (callbacks :accessor manager->callbacks
+              :initform (make-hash-table))
+   (response-thread :accessor manager->message-thread
+                    :initform '())))
 
-(read-line *stream*)
+(defmethod receive-data ((self manager))
+  (setf *stream* (usocket:socket-stream (manager->socket self)))
+  (loop :when (manager->connected self)
+     :do (setf (manager->response-queue self)
+               (append (manager->response-queue self) (read-line *stream*))))))
 
-(setf *crlf* (format nil "~C~C" #\Return #\Newline))
+(defmethod connect ((self manager) host port)
+  (setf (manager->socket self) (usocket:socket-connect host port))
+  (setf (manager->connected self) t)
+  (setf (manager->response-thread self) (bt:make-thread #'receive-data))
 
-(setf *login* (format nil "Action: Login~aUsername: omnileadsami~aSecret: 5_MeO_DMT~a~a"
-                      *crlf* *crlf* *crlf* *crlf*))
 
-(format *stream* *login*)
+(defmethod close ((self manager))
+  (setf (manager->connected self) nil)
+  (usocket:socket-close (manager->socket self)))
 
-(force-output *stream*)
+(defmethod send-action ((self manager) name &key params)
+  (setf *stream* (usocket:socket-stream (manager->socket)))
+  (setf action (format nil "Action: ~a~a" name *crlf*))
+  (maphash (lambda (key value)
+             (setf action (concatenate 'string action (format nil "~a: ~a~a" key value *crlf*)))
+             params))
+  (concatenate 'string action *crlf*)
+  (format  *stream* action)
+  (force-output *stream*))
 
-(USOCKET:socket-close *socket*)
+(defmethod login ((self manager)))
+
+(defmethod command ((self manager)))
