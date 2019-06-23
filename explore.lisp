@@ -1,5 +1,5 @@
 ;; Sockets AMI TCP snippet working!!
-(ql:quickload :usocket)
+(ql:quickload '(:usocket :bordeaux-threads :safe-queue :babel))
 
 (setf *socket* (usocket:socket-connect "asterisk-dialer" 5038))
 
@@ -15,3 +15,5 @@
 (format *stream* *login*)
 
 (force-output *stream*)
+
+(USOCKET:socket-close *socket*)
