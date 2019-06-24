@@ -1,5 +1,8 @@
 ;; Sockets AMI TCP snippet working!!
-(ql:quickload '(:usocket :bordeaux-threads :safe-queue :babel))
+(ql:quickload '(:usocket :bordeaux-threads))
+
+;; evaluate the use of :lparalell, :safe-queue, :babel, :cl-mpi
+
 
 (defparameter *crlf* (format nil "~C~C" #\return #\newline))
 
