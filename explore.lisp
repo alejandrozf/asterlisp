@@ -8,31 +8,33 @@
 
 (defclass manager ()
   ((socket :accessor manager->socket :initform nil)
-   (connected :accessor manager->connected :iniform nil)
-   (response-queue :accessor manager->response-queue)
+   (connected :accessor manager->connected :initform nil)
+   (response-queue :accessor manager->response-queue
+                   :initform '())
    (callbacks :accessor manager->callbacks
               :initform (make-hash-table))
-   (response-thread :accessor manager->message-thread
-                    :initform '())))
+   (response-thread :accessor manager->response-thread
+                    :initform nil)))
 
 (defmethod receive-data ((self manager))
   (setf *stream* (usocket:socket-stream (manager->socket self)))
   (loop :when (manager->connected self)
      :do (setf (manager->response-queue self)
-               (append (manager->response-queue self) (read-line *stream*))))))
+               (append (manager->response-queue self) (list (read-line *stream*))))))
 
-(defmethod connect ((self manager) host port)
+(defmethod connect ((self manager) host port &key)
   (setf (manager->socket self) (usocket:socket-connect host port))
   (setf (manager->connected self) t)
-  (setf (manager->response-thread self) (bt:make-thread #'receive-data))
+  (setf (manager->response-thread self) (bt:make-thread (lambda () (receive-data self)))))
 
 
-(defmethod close ((self manager))
+(defmethod close ((self manager) &key abort)
   (setf (manager->connected self) nil)
-  (usocket:socket-close (manager->socket self)))
+  (usocket:socket-close (manager->socket self))
+  )
 
-(defmethod send-action ((self manager) name &key params)
-  (setf *stream* (usocket:socket-stream (manager->socket)))
+(defmethod send-action ((self manager) name params &key)
+  (setf *stream* (usocket:socket-stream (manager->socket self)))
   (setf action (format nil "Action: ~a~a" name *crlf*))
   (maphash (lambda (key value)
              (setf action (concatenate 'string action (format nil "~a: ~a~a" key value *crlf*)))
@@ -41,6 +43,7 @@
   (format  *stream* action)
   (force-output *stream*))
 
-(defmethod login ((self manager)))
+(defmethod command ((self manager) params &key)
+  (send-action self "Command" params))
 
-(defmethod command ((self manager)))
+(defmethod login ((self manager)))
