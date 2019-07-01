@@ -55,3 +55,5 @@
 (defmethod logout ((self manager) &key)
   (let ((params (make-hash-table)))
     (send-action self "Logoff" params)))
+
+;TODO: make use of &allow-other-keys in params
