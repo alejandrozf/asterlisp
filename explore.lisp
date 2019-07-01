@@ -51,3 +51,7 @@
     (setf (gethash "Username" params) username)
     (setf (gethash "Secret" params) password)
     (send-action self "Login" params)))
+
+(defmethod logout ((self manager) &key)
+  (let ((params (make-hash-table)))
+    (send-action self "Logoff" params)))
