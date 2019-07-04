@@ -33,28 +33,39 @@
   (usocket:socket-close (manager->socket self))
   )
 
-(defmethod send-action ((self manager) name params &key)
+(defmethod send-action ((self manager) name &rest params &key &allow-other-keys)
   (setf *stream* (usocket:socket-stream (manager->socket self)))
   (setf action (format nil "Action: ~a~a" name *crlf*))
-  (maphash (lambda (key value)
-             (setf action (concatenate 'string action (format nil "~a: ~a~a" key value *crlf*))))
-             params)
+  (loop for (key value) on params by #'cddr :do
+       (setf action (concatenate
+                     'string action (format nil "~a: ~a~a" key value *crlf*))))
   (setf action (concatenate 'string action *crlf*))
   (format  *stream* action)
   (force-output *stream*))
 
-(defmethod command ((self manager) params &key)
-  (send-action self "Command" params))
+(defmethod command ((self manager) command)
+  (send-action self "Command" :command command))
 
 (defmethod login ((self manager) username password &key)
-  (let ((params (make-hash-table)))
-    (setf (gethash "Username" params) username)
-    (setf (gethash "Secret" params) password)
-    (send-action self "Login" params)))
+  (send-action self "Login" :username username :secret password))
 
 (defmethod logout ((self manager) &key)
-  (let ((params (make-hash-table)))
-    (setf (manager->connected self) nil)
-    (send-action self "Logoff" params)))
+  (setf (manager->connected self) nil)
+  (send-action self "Logoff"))
 
-;TODO: make use of &allow-other-keys in params
+;; (defmethod originate ((self manager) channel exten
+;;                       &key (context "") (priority "") (timeout "") (caller-id "") (async nil) (earlymedia "false")
+;;                         (account "") (variables '()))
+;;   (macrolet ((generate-send-action ))
+;;     )
+;;   (let ((params '(:channel channel :exten exten))
+;;         (variables '()))
+;;     (unless (equal context "") (nconc params `(:context context)))
+;;     (unless (equal priority "") (nconc params `(:priority priority)))
+;;     (unless (equal timeout "") (nconc params `(:timeout timeout)))
+;;     (unless (equal caller-id "") (nconc params `(:callerid caller-id)))
+;;     (when async (nconc params `(:async "yes")))
+;;     (unless earlymedia (nconc params `(:earlymedia earlymedia)))
+;;     (loop for (key value) on variables :by #'cddr :do
+;;          (nconc params variables)
+;;     `(send-action self "Originate" ,@params)))
