@@ -52,30 +52,29 @@
   (setf (manager->connected self) nil)
   (send-action self "Logoff"))
 
-(defmacro send-action-originate (manager channel exten context priority timeout application data
-                                 caller-id async earlymedia account variables)
-  (let ((params (list :channel channel :exten exten))
-        (variables '()))
-    (unless (equal context "") (nconc params `(:context ,context)))
-    (unless (equal priority "") (nconc params `(:priority ,priority)))
-    (unless (equal timeout "") (nconc params `(:timeout ,timeout)))
-    (unless (equal application "") (nconc params `(:application ,application)))
-    (unless (equal data "") (nconc params `(:data ,data)))
-    (unless (equal caller-id "") (nconc params `(:callerid ,caller-id)))
-    (when async (nconc params `(:async "yes")))
-    (unless earlymedia (nconc params `(:earlymedia ,earlymedia)))
-    (loop for (key value) on variables :by #'cddr :do
-         (nconc variables (list (format nil "~a=~a" key value))))
-    (setf variables (format nil "~{~A~^|~}" variables))
-    (nconc params `(:variable ,variables))
-  `(send-action ,manager "Originate" ,@params)))
-
 (defmethod originate ((self manager) channel exten
                       &key (context "") (priority "") (timeout "") (application "") (data "")
                         (caller-id "") (async nil) (earlymedia "false") (account "")
                         (variables '()))
+  (macrolet ((send-action-originate (manager channel exten context priority timeout application data
+                                             caller-id async earlymedia account variables)
+               (let ((params (list :channel channel :exten exten))
+                     (variables '()))
+                 (unless (equal context "") (nconc params `(:context ,context)))
+                 (unless (equal priority "") (nconc params `(:priority ,priority)))
+                 (unless (equal timeout "") (nconc params `(:timeout ,timeout)))
+                 (unless (equal application "") (nconc params `(:application ,application)))
+                 (unless (equal data "") (nconc params `(:data ,data)))
+                 (unless (equal caller-id "") (nconc params `(:callerid ,caller-id)))
+                 (when async (nconc params `(:async "yes")))
+                 (unless earlymedia (nconc params `(:earlymedia ,earlymedia)))
+                 (loop for (key value) on variables :by #'cddr :do
+                      (nconc variables (list (format nil "~a=~a" key value))))
+                 (setf variables (format nil "~{~A~^|~}" variables))
+                 (nconc params `(:variable ,variables))
+                 `(send-action ,manager "Originate" ,@params))))
   (send-action-originate self channel exten context priority timeout application data
-                         caller-id async earlymedia account variables))
+                         caller-id async earlymedia account variables)))
 
 ;; Example
 ;; (setf manager1 (make-instance 'manager))
