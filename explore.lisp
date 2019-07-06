@@ -3,7 +3,6 @@
 
 ;; evaluate the use of :lparalell, :safe-queue, :babel, :cl-mpi
 
-
 (defparameter *crlf* (format nil "~C~C" #\return #\newline))
 
 (defclass manager ()
@@ -27,11 +26,11 @@
   (setf (manager->connected self) t)
   (setf (manager->response-thread self) (bt:make-thread (lambda () (receive-data self)))))
 
-
 (defmethod close ((self manager) &key abort)
   (setf (manager->connected self) nil)
   (usocket:socket-close (manager->socket self))
   )
+
 
 (defmethod send-action ((self manager) name &rest params &key &allow-other-keys)
   (setf *stream* (usocket:socket-stream (manager->socket self)))
@@ -53,24 +52,35 @@
   (setf (manager->connected self) nil)
   (send-action self "Logoff"))
 
+(defmacro send-action-originate (manager channel exten context priority timeout application data
+                                 caller-id async earlymedia account variables)
+  (let ((params (list :channel channel :exten exten))
+        (variables '()))
+    (unless (equal context "") (nconc params `(:context ,context)))
+    (unless (equal priority "") (nconc params `(:priority ,priority)))
+    (unless (equal timeout "") (nconc params `(:timeout ,timeout)))
+    (unless (equal application "") (nconc params `(:application ,application)))
+    (unless (equal data "") (nconc params `(:data ,data)))
+    (unless (equal caller-id "") (nconc params `(:callerid ,caller-id)))
+    (when async (nconc params `(:async "yes")))
+    (unless earlymedia (nconc params `(:earlymedia ,earlymedia)))
+    (loop for (key value) on variables :by #'cddr :do
+         (nconc variables (list (format nil "~a=~a" key value))))
+    (setf variables (format nil "~{~A~^|~}" variables))
+    (nconc params `(:variable ,variables))
+  `(send-action ,manager "Originate" ,@params)))
+
 (defmethod originate ((self manager) channel exten
                       &key (context "") (priority "") (timeout "") (application "") (data "")
                         (caller-id "") (async nil) (earlymedia "false") (account "")
                         (variables '()))
-  (macrolet ((send-action-call (self action paramas)
-               `(send-action ,self ,action ,@params)))
-    (let ((params '(:channel channel :exten exten))
-          (variables '()))
-      (unless (equal context "") (nconc params `(:context context)))
-      (unless (equal priority "") (nconc params `(:priority priority)))
-      (unless (equal timeout "") (nconc params `(:timeout timeout)))
-      (unless (equal application "") (nconc params `(:application application)))
-      (unless (equal data "") (nconc params `(:data data)))
-      (unless (equal caller-id "") (nconc params `(:callerid caller-id)))
-      (when async (nconc params `(:async "yes")))
-      (unless earlymedia (nconc params `(:earlymedia earlymedia)))
-      (loop for (key value) on variables :by #'cddr :do
-           (nconc variables (list (format nil "~a=~a" key value))))
-      (setf variables (format nil "~{~A~^|~}" variables))
-      (nconc params variables)
-      `(send-action-call self "Originate" params))))
+  (send-action-originate self channel exten context priority timeout application data
+                         caller-id async earlymedia account variables))
+
+;; Example
+;; (setf manager1 (make-instance 'manager))
+;; (connect manager1 "asterisk-dialer" 5038)
+;; (login manager1 '("omnileadsami" "5_MeO_DMT"))
+;; (originate manager1 "Local/351111111@from-dialer/n" "s" :context "call-answered" :PRIORITY "1")
+;; (command manager1 "database show")
+;; (logout manager1)
