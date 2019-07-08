@@ -3,4 +3,4 @@
 (defpackage #:dingodialer
   (:use #:cl)
   (:export
-   :asterisk-db-show))
+   :manager :connect :login :close :send-action :command :originate))

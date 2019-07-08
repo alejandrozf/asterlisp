@@ -6,6 +6,7 @@
   :license  "Specify license here"
   :version "0.0.1"
   :serial t
-  :depends-on (:drakma)
+  ;; evaluate the use of :lparalell, :safe-queue, :babel, :cl-mpi
+  :depends-on (:drakma :usocket :bordeaux-threads)
   :components ((:file "package")
                (:file "dingodialer")))
