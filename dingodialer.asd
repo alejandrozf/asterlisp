@@ -1,9 +1,9 @@
 ;;;; dingodialer.asd
 
 (asdf:defsystem #:dingodialer
-  :description "Describe dingodialer here"
-  :author "Your Name <your.name@example.com>"
-  :license  "Specify license here"
+  :description "AMI client"
+  :author "Alejandro Zamora Fonseca <ale2014.zamora@gmail.com>"
+  :license  "GPLv3"
   :version "0.0.1"
   :serial t
   ;; evaluate the use of :lparalell, :safe-queue, :babel, :cl-mpi, :ceramic
