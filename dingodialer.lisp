@@ -4,21 +4,32 @@
 
 (defparameter *crlf* (format nil "~C~C" #\return #\newline))
 
+(defparameter *test-output* *standard-output*) ;for debugging purposes
+
 (defclass manager ()
   ((socket :accessor manager->socket :initform nil)
    (connected :accessor manager->connected :initform nil)
    (response-queue :accessor manager->response-queue
                    :initform '())
    (callbacks :accessor manager->callbacks
-              :initform (make-hash-table))
+              :initform (make-hash-table :test 'equal))
    (response-thread :accessor manager->response-thread
                     :initform nil)))
 
 (defmethod receive-data ((self manager))
-  (setf *stream* (usocket:socket-stream (manager->socket self)))
-  (loop :when (manager->connected self)
-     :do (setf (manager->response-queue self)
-               (append (manager->response-queue self) (list (read-line *stream*))))))
+  (flet ((dispatch-callback (event)
+           (if event
+               (format *test-output* "|event=~a|~%" event)))
+         (get-event (data-line)
+           (let* ((scanner (ppcre:create-scanner "^Event: (.*)$"))
+                  (match (nth-value 1 (ppcre:scan-to-strings scanner data-line))))
+             (if match (aref match 0)))))
+    (setf *stream* (usocket:socket-stream (manager->socket self)))
+    (loop :when (manager->connected self)
+       :do (let ((data-line (read-line *stream*)))
+             (dispatch-callback (get-event data-line))
+             (setf (manager->response-queue self)
+                   (append (manager->response-queue self) (list data-line)))))))
 
 (defmethod connect ((self manager) host port &key)
   (setf (manager->socket self) (usocket:socket-connect host port))
@@ -75,10 +86,10 @@
   (send-action-originate self channel exten context priority timeout application data
                          caller-id async earlymedia account variables)))
 
-;; Example
+;; Example:
 ;; (setf manager1 (make-instance 'manager))
 ;; (connect manager1 "asterisk-dialer" 5038)
-;; (login manager1 '("omnileadsami" "5_MeO_DMT"))
+;; (login manager1 "omnileadsami" "5_MeO_DMT")
 ;; (originate manager1 "Local/351111111@from-dialer/n" "s" :context "call-answered" :PRIORITY "1")
 ;; (command manager1 "database show")
 ;; (logout manager1)
