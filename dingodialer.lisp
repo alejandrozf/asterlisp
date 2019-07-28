@@ -18,8 +18,10 @@
 
 (defmethod receive-data ((self manager))
   (flet ((dispatch-callback (event)
-           (if event
-               (format *test-output* "|event=~a|~%" event)))
+           (when event
+             (let ((callback (gethash event (manager->callbacks self))))
+               (when callback
+                 (bt:make-thread callback)))))
          (get-event (data-line)
            (let* ((scanner (ppcre:create-scanner "^Event: (.*)$"))
                   (match (nth-value 1 (ppcre:scan-to-strings scanner data-line))))
@@ -40,7 +42,6 @@
   (setf (manager->connected self) nil)
   (usocket:socket-close (manager->socket self))
   )
-
 
 (defmethod send-action ((self manager) name &rest params &key &allow-other-keys)
   (setf *stream* (usocket:socket-stream (manager->socket self)))
@@ -87,7 +88,10 @@
                          caller-id async earlymedia account variables)))
 
 ;; Example:
+;; (ql:quickload :dingodialer)
+;; (in-package :dingodialer)
 ;; (setf manager1 (make-instance 'manager))
+;; (setf (gethash "Hangup" (manager->callbacks manager1)) (lambda () (print "Hangup detected from callback" *test-output*)))
 ;; (connect manager1 "asterisk-dialer" 5038)
 ;; (login manager1 "omnileadsami" "5_MeO_DMT")
 ;; (originate manager1 "Local/351111111@from-dialer/n" "s" :context "call-answered" :PRIORITY "1")
