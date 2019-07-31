@@ -1,6 +1,6 @@
-;;;; dingodialer.lisp
+;;;; asterlisp.lisp
 
-(in-package #:dingodialer)
+(in-package #:asterlisp)
 
 (defparameter *crlf* (format nil "~C~C" #\return #\newline))
 
@@ -88,8 +88,8 @@
                          caller-id async earlymedia account variables)))
 
 ;; Example:
-;; (ql:quickload :dingodialer)
-;; (in-package :dingodialer)
+;; (ql:quickload :asterlisp)
+;; (in-package :asterlisp)
 ;; (setf manager1 (make-instance 'manager))
 ;; (setf (gethash "Hangup" (manager->callbacks manager1)) (lambda () (print "Hangup detected from callback" *test-output*)))
 ;; (connect manager1 "asterisk-dialer" 5038)

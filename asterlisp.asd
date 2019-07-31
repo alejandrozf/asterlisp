@@ -1,6 +1,6 @@
-;;;; dingodialer.asd
+;;;; asterlisp.asd
 
-(asdf:defsystem #:dingodialer
+(asdf:defsystem #:asterlisp
   :description "AMI client"
   :author "Alejandro Zamora Fonseca <ale2014.zamora@gmail.com>"
   :license  "GPLv3"
@@ -9,4 +9,4 @@
   ;; evaluate the use of :lparalell, :safe-queue, :babel, :cl-mpi, :ceramic
   :depends-on (:drakma :usocket :bordeaux-threads)
   :components ((:file "package")
-               (:file "dingodialer")))
+               (:file "asterlisp")))

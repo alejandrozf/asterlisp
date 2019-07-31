@@ -1,8 +1,8 @@
-;; dingodialer old initial code, only here for historical reasons
+;; asterlisp old initial code, only here for historical reasons
 ;; it uses HTTP to make AMI calls, changed for use sockets for convenience
 ;; events logs access
 
-(in-package #:dingodialer)
+(in-package #:asterlisp)
 
 (setf *login-parameters* '(("action" . "login")
                            ("username" . "omnileadsami")
