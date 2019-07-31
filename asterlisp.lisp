@@ -88,7 +88,7 @@
                          caller-id async earlymedia account variables)))
 
 ;; Example:
-;; (ql:quickload :asterlisp)
+;; (ql-dist:install-dist "http://dist.ultralisp.org/" :prompt nil)
 ;; (in-package :asterlisp)
 ;; (setf manager1 (make-instance 'manager))
 ;; (setf (gethash "Hangup" (manager->callbacks manager1)) (lambda () (print "Hangup detected from callback" *test-output*)))
