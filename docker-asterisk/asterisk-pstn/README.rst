@@ -1,28 +1,29 @@
 ****************************
-Entorno de pruebas asterisk
+Asterisk testing environment
 ****************************
 
-* Para levantar el entorno se debe ejecutar:
+* To run:
 docker-compose up -d
 
-* Luego ejecutar el bash script
+* Then execute the script
 sh containers-cp-conf.sh
 
-* Sofphone de pruebas
-Se puede registra un Sofphone sobre el contenedor asterisk-pstn
+* Testing softphone
+You can register a Sofphone over the asterisk-pstn container with the following credentials:
+
 username: 01177660050
 secret: 098098
 IP: 172.46.0.3
 
-* Dependiendo de la terminación del numero marcado, pstn-emulator va a realizar las siiguientes acciones sobre una llamada:
+* Depending on the digit at the end of the dialed number, the pstn-emulator should do the following actions over a call:
 
-Terminación 0 = busy
-Terminación 1 = Atiende
-Terminación 2 = Marca al softphone
-Terminación 3 = Atiende
-Terminación 4 = Atiende
-Terminación 5 = No answer
-Terminación 6 = Atiende
-Terminación 7 = Atiende
-Terminación 8 = Atiende
-Terminación 9 = Congestion
+0 = busy
+1 = Atiende
+2 = Marca al softphone
+3 = Atiende
+4 = Atiende
+5 = No answer
+6 = Atiende
+7 = Atiende
+8 = Atiende
+9 = Congestion
