@@ -1,8 +1,8 @@
 # dingodialer
 ### _Alejandro Zamora <ale2014.zamora@gmail.com>_
 
-This is a project to make an Asterisk dialer.
+Common Lisp client to Asterisk AMI protocol.
 
 ## License
 
-Specify license here
+MIT
