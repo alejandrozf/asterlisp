@@ -3,6 +3,8 @@
 
 Common Lisp client to Asterisk AMI protocol.
 
+(Tested on SBCL 1.5.4)
+
 ## Quickstart
 
 - Setup Asterisk
@@ -39,9 +41,9 @@ Common Lisp client to Asterisk AMI protocol.
   ASTERLISP> (originate manager1 "Local/351111111@from-dialer/n" "s"
                         :context "call-answered" :PRIORITY "1")
 
-  "Hangup"
-  "Hangup"
-  "Hangup"
+  "Hangup detected from callback"
+  "Hangup detected from callback"
+  "Hangup detected from callback"
 
   ASTERLISP> (logout manager1)
 
