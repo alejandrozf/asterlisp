@@ -10,7 +10,9 @@ Common Lisp client to Asterisk AMI protocol.
   *You will need docker-compose installed*
 
   $ cd docker-asterisk
+
   $ docker-compose up -d
+
   $ sh containers-cp-conf.sh
 
 - Load library
