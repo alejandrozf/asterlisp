@@ -28,7 +28,7 @@ Common Lisp client to Asterisk AMI protocol.
   ASTERLISP> (setf manager1 (make-instance 'manager))
 
   ASTERLISP> (setf (gethash "Hangup" (manager->callbacks manager1))
-                   (lambda () (print "Hangup detected from callback" *test-output*)))
+                   (lambda () (print "Hangup detected from callback" test-output)))
 
   ASTERLISP> (connect manager1 "172.46.0.2" 5038)
 

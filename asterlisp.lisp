@@ -4,7 +4,7 @@
 
 (defparameter *crlf* (format nil "~C~C" #\return #\newline))
 
-(defparameter *test-output* *standard-output*) ;for debugging purposes
+(defparameter test-output *standard-output*) ;for debugging purposes
 
 (defclass manager ()
   ((socket :accessor manager->socket :initform nil)
@@ -91,7 +91,7 @@
 ;; (ql-dist:install-dist "http://dist.ultralisp.org/" :prompt nil)
 ;; (in-package :asterlisp)
 ;; (setf manager1 (make-instance 'manager))
-;; (setf (gethash "Hangup" (manager->callbacks manager1)) (lambda () (print "Hangup detected from callback" *test-output*)))
+;; (setf (gethash "Hangup" (manager->callbacks manager1)) (lambda () (print "Hangup detected from callback" test-output)))
 ;; (connect manager1 "172.46.0.2" 5038)
 ;; (login manager1 "omnileadsami" "5_MeO_DMT")
 ;; (originate manager1 "Local/351111111@from-dialer/n" "s" :context "call-answered" :PRIORITY "1")
