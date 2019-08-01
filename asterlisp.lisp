@@ -14,9 +14,11 @@
    (callbacks :accessor manager->callbacks
               :initform (make-hash-table :test 'equal))
    (response-thread :accessor manager->response-thread
-                    :initform nil)))
+                    :initform nil))
+  (:documentation "Base class to access AMI specification"))
 
 (defmethod receive-data ((self manager))
+  "Reads events data from Asterisk"
   (flet ((dispatch-callback (event)
            (when event
              (let ((callback (gethash event (manager->callbacks self))))
@@ -34,16 +36,19 @@
                    (append (manager->response-queue self) (list data-line)))))))
 
 (defmethod connect ((self manager) host port &key)
+  "Connects to Asterisk server and start the receiving data thread"
   (setf (manager->socket self) (usocket:socket-connect host port))
   (setf (manager->connected self) t)
   (setf (manager->response-thread self) (bt:make-thread (lambda () (receive-data self)))))
 
 (defmethod close ((self manager) &key abort)
+  "Closes connection to Asterisk server"
   (setf (manager->connected self) nil)
   (usocket:socket-close (manager->socket self))
   )
 
 (defmethod send-action ((self manager) name &rest params &key &allow-other-keys)
+  "Sends an action to Asterisk"
   (setf *stream* (usocket:socket-stream (manager->socket self)))
   (setf action (format nil "Action: ~a~a" name *crlf*))
   (loop for (key value) on params by #'cddr :do
@@ -54,12 +59,15 @@
   (force-output *stream*))
 
 (defmethod command ((self manager) command)
+  "Sends a command to Asterisk"
   (send-action self "Command" :command command))
 
 (defmethod login ((self manager) username password &key)
+  "Sends the LOGIN command to Asterisk"
   (send-action self "Login" :username username :secret password))
 
 (defmethod logout ((self manager) &key)
+  "Sends the LOGOUT command to Asterisk"
   (setf (manager->connected self) nil)
   (send-action self "Logoff"))
 
@@ -67,6 +75,7 @@
                       &key (context "") (priority "") (timeout "") (application "") (data "")
                         (caller-id "") (async nil) (earlymedia "false") (account "")
                         (variables '()))
+  "Sends the ORIGINATE command to Asterisk"
   (macrolet ((send-action-originate (manager channel exten context priority timeout application data
                                              caller-id async earlymedia account variables)
                (let ((params (list :channel channel :exten exten))
