@@ -3,7 +3,7 @@
 
 Common Lisp client to Asterisk AMI protocol.
 
-(Tested on SBCL 1.5.4)
+(Tested on SBCL 1.5.4 & Asterisk 16.3.0)
 
 ## Quickstart
 
