@@ -39,7 +39,7 @@ Common Lisp client to Asterisk AMI protocol.
   ASTERLISP> (login manager1 "omnileadsami" "5_MeO_DMT")
 
   ASTERLISP> (originate manager1 "Local/351111111@from-dialer/n" "s"
-                        :context "call-answered" :PRIORITY "1")
+                        :context "call-answered" :PRIORITY "1" :variables '(:a 1 :b 2))
 
   "Hangup detected from callback"
   "Hangup detected from callback"
