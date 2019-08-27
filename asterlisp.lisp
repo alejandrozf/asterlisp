@@ -47,15 +47,26 @@
   (usocket:socket-close (manager->socket self))
   )
 
+(defun process-variables (variables)
+  (let ((result variables))
+    (setf result (loop for (key value) on variables by #'cddr
+                    :collect (format nil "~a=~a" key value)))
+    (setf result (format nil "~{~A~^,~}" result))
+    result))
+
 (defmethod send-action ((self manager) name &rest params &key &allow-other-keys)
   "Sends an action to Asterisk"
   (setf *stream* (usocket:socket-stream (manager->socket self)))
   (setf action (format nil "Action: ~a~a" name *crlf*))
   (loop for (key value) on params by #'cddr :do
-       (setf action (concatenate
-                     'string action (format nil "~a: ~a~a" key value *crlf*))))
+       (if (equal key :variable)
+           (setf action (concatenate
+                         'string action (format nil "~a: ~a~a" key (process-variables value)
+                                                *crlf*)))
+           (setf action (concatenate
+                         'string action (format nil "~a: ~a~a" key value *crlf*)))))
   (setf action (concatenate 'string action *crlf*))
-  (format  *stream* action)
+  (format *stream* action)
   (force-output *stream*))
 
 (defmethod command ((self manager) command)
@@ -78,8 +89,7 @@
   "Sends the ORIGINATE command to Asterisk"
   (macrolet ((send-action-originate (manager channel exten context priority timeout application data
                                              caller-id async earlymedia account variables)
-               (let ((params (list :channel channel :exten exten))
-                     (variables '()))
+               (let ((params (list :channel channel :exten exten)))
                  (unless (equal context "") (nconc params `(:context ,context)))
                  (unless (equal priority "") (nconc params `(:priority ,priority)))
                  (unless (equal timeout "") (nconc params `(:timeout ,timeout)))
@@ -88,10 +98,7 @@
                  (unless (equal caller-id "") (nconc params `(:callerid ,caller-id)))
                  (when async (nconc params `(:async "yes")))
                  (unless earlymedia (nconc params `(:earlymedia ,earlymedia)))
-                 (loop for (key value) on variables :by #'cddr :do
-                      (nconc variables (list (format nil "~a=~a" key value))))
-                 (setf variables (format nil "~{~A~^|~}" variables))
-                 (nconc params `(:variable ,variables))
+                 (when variables (nconc params `(:variable ,variables)))
                  `(send-action ,manager "Originate" ,@params))))
   (send-action-originate self channel exten context priority timeout application data
                          caller-id async earlymedia account variables)))
