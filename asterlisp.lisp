@@ -2,6 +2,10 @@
 
 (in-package #:asterlisp)
 
+;; TODO: parameterize log file (now is on /)
+;change to :info to see messages
+(log:config :daily "asterlisp.log" :off)
+
 (defparameter *crlf* (format nil "~C~C" #\return #\newline))
 
 (defparameter test-output *standard-output*) ;for debugging purposes
@@ -30,7 +34,12 @@
              (if match (aref match 0)))))
     (setf *stream* (usocket:socket-stream (manager->socket self)))
     (loop :when (manager->connected self)
-       :do (let ((data-line (read-line *stream*)))
+       :do (let ((data-line (handler-case (read-line *stream*)
+                              ;; We lost socket connection to Asterisk server
+                              (error (e)
+                                (log:error "Can't read from Asterisk server")
+                                (setf (manager->connected self) nil)))))
+             (log:info "Trying to read data from Asterisk")
              (dispatch-callback (get-event data-line))
              (setf (manager->response-queue self)
                    (append (manager->response-queue self) (list data-line)))))))
@@ -80,7 +89,8 @@
 (defmethod logout ((self manager) &key)
   "Sends the LOGOUT command to Asterisk"
   (setf (manager->connected self) nil)
-  (send-action self "Logoff"))
+  (send-action self "Logoff")
+  (bt:destroy-thread (manager->response-thread self)))
 
 (defmethod originate ((self manager) channel exten
                       &key (context "") (priority "") (timeout "") (application "") (data "")
