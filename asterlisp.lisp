@@ -50,7 +50,7 @@
   (setf (manager->connected self) t)
   (setf (manager->response-thread self) (bt:make-thread (lambda () (receive-data self)))))
 
-(defmethod close ((self manager) &key abort)
+(defmethod disconnect ((self manager) &key abort)
   "Closes connection to Asterisk server"
   (setf (manager->connected self) nil)
   (usocket:socket-close (manager->socket self))
