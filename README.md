@@ -3,7 +3,12 @@
 
 Common Lisp client to Asterisk AMI protocol.
 
-(Tested on SBCL 1.5.4 & Asterisk 16.3.0)
+Tested on:
+  - SBCL (1.5.4, 2.0.0)
+    Clozure CL 1.12
+  - Asterisk 16.3.0
+  - Ubuntu 18.04
+  - x86_64
 
 ## Quickstart
 
