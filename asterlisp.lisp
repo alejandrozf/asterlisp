@@ -27,7 +27,8 @@
            (when event
              (let ((callback (gethash event (manager->callbacks self))))
                (when callback
-                 (bt:make-thread callback)))))
+                 (bt:make-thread callback :name (format nil "callback-~a"
+                                                        (symbol-name (gensym))))))))
          (get-event (data-line)
            (let* ((scanner (ppcre:create-scanner "^Event: (.*)$"))
                   (match (nth-value 1 (ppcre:scan-to-strings scanner data-line))))
@@ -48,7 +49,9 @@
   "Connects to Asterisk server and start the receiving data thread"
   (setf (manager->socket self) (usocket:socket-connect host port))
   (setf (manager->connected self) t)
-  (setf (manager->response-thread self) (bt:make-thread (lambda () (receive-data self)))))
+  (setf (manager->response-thread self)
+        (bt:make-thread (lambda () (receive-data self))
+                        :name (format nil "response-thread-~a" (symbol-name (gensym))))))
 
 (defmethod disconnect ((self manager) &key abort)
   "Closes connection to Asterisk server"
