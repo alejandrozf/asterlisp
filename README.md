@@ -37,7 +37,7 @@ Tested on:
   ASTERLISP> (setf manager1 (make-instance 'manager))
 
   ASTERLISP> (setf (gethash "Hangup" (manager->callbacks manager1))
-                   (lambda () (print "Hangup detected from callback" test-output)))
+                   (lambda () (disconnect manager1) (print "Hangup detected from callback" test-output)))
 
   ASTERLISP> (connect manager1 "172.46.0.2" 5038)
 
@@ -46,11 +46,11 @@ Tested on:
   ASTERLISP> (originate manager1 "Local/351111111@from-dialer/n" "s"
                         :context "call-answered" :PRIORITY "1" :variables '(:a 1 :b 2))
 
-  "Hangup detected from callback"
-  "Hangup detected from callback"
+  NIL
+
   "Hangup detected from callback"
 
-  ASTERLISP> (logout manager1)
+  ASTERLISP>
 
 ## License
 

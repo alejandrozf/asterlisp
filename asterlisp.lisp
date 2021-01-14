@@ -57,7 +57,7 @@
   "Closes connection to Asterisk server"
   (setf (manager->connected self) nil)
   (usocket:socket-close (manager->socket self))
-  )
+  (bt:destroy-thread (manager->response-thread self)))
 
 (defun process-variables (variables)
   (let ((result variables))
@@ -91,9 +91,7 @@
 
 (defmethod logout ((self manager) &key)
   "Sends the LOGOUT command to Asterisk"
-  (setf (manager->connected self) nil)
-  (send-action self "Logoff")
-  (bt:destroy-thread (manager->response-thread self)))
+  (send-action self "Logoff"))
 
 (defmethod originate ((self manager) channel exten
                       &key (context "") (priority "") (timeout "") (application "") (data "")
